@@ -1,55 +1,216 @@
+/* Estilos base */
 .home-container {
-    padding: 20px;
-    min-height: 100vh;
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-  
-  .dark-theme .home-container {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-  }
-  
-  .light-theme .home-container {
-    background-color: var(--bg-color);
-    color: var(--text-color);
+  display: flex;
+  height: 100vh;
+  align-items: center;
+  transition: background-color 0.3s ease;
+  flex-wrap: nowrap;
+    justify-content: space-around;
+
+}
+
+
+
+/* Tema oscuro (valores por defecto) */
+.dark-theme .home-container {
+  background-color: #101728;
+}
+
+.dark-theme .home-left-container h1 {
+  color: #ffffff;
+}
+
+.dark-theme .home-left-container p {
+  color: #b1b1b1;
+}
+
+.dark-theme .home-avatar-container {
+  border: 0.5vw solid rgba(6, 14, 80, 0.8);
+  box-shadow: 0 0 50px 20px rgba(55, 172, 240, 0.5);
+  background-color: #000;
+}
+
+/* Tema claro */
+.light-theme .home-container {
+  background-color: #f5f7fa;
+}
+
+.light-theme .home-left-container h1 {
+  color: #3a4aa7;
+}
+
+.light-theme .home-left-container p {
+  color: #3c3d3d;
+}
+
+.light-theme .home-avatar-container {
+  border: 0.5vw solid rgba(45, 99, 248, 0.8);
+  box-shadow: 0 0 50px 20px rgba(100, 180, 240, 0.3);
+  background-color: #f0f0f0;
+}
+
+/* Contenedor izquierdo (Avatar) */
+.home-left-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  gap: 50px;
+}
+
+.home-avatar-container {
+  width: 50%;
+  height: 50%;
+  min-height: 200px;
+  min-width: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 20%;
+  overflow: hidden;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.home-avatar-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.home-avatar-video::-webkit-media-controls {
+  display: none !important;
+}
+
+/* Contenedor derecho (Canvas) */
+.home-right-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.home-circle-canvas {
+  width: 80%; /* Ajusta el tamaño del canvas */
+  aspect-ratio: 1; /* Mantiene el canvas cuadrado */
+  border-radius: 50%; /* Hace el canvas circular */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Tema oscuro */
+.dark-theme .home-circle-canvas {
+  background-color: #f8f8f8; /* Fondo oscuro */
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1); /* Sombra clara */
+}
+
+/* Tema claro */
+.light-theme .home-circle-canvas {
+  background-color: rgb(65, 113, 204); /* Fondo claro */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Sombra oscura */
+}
+
+/* Botón de configuración flotante */
+.home-settings-floating-button {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  border-radius: 12px; /* Esquinas redondeadas */
+  background: var(--theme-button-bg);
+  color: var(--theme-button-color);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.home-settings-floating-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.home-settings-icon {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.3s ease;
+}
+
+.home-avatar-label {
+  font-size: 2.5rem; /* Tamaño grande para el título */
+  font-weight: bold; /* Negrita para resaltar */
+  text-align: center; /* Centrado */
+  margin-top: 20px; /* Espaciado superior */
+  transition: color 0.3s ease; /* Transición suave para el cambio de color */
+}
+
+/* Estilo para modo oscuro */
+.dark-theme .home-avatar-label {
+  color: #f5f4f4; /* Color claro para texto en modo oscuro */
+}
+
+/* Estilo para modo claro */
+.light-theme .home-avatar-label {
+  color: #333; /* Color oscuro para texto en modo claro */
+}
+
+.home-settings-floating-button:hover .home-settings-icon {
+  transform: scale(1.1);
+}
+
+/* Estilos específicos por tema */
+.dark-theme .home-settings-floating-button {
+  --theme-button-bg: #2d3748;
+  --theme-button-color: #f7fafc;
+}
+
+.light-theme .home-settings-floating-button {
+  --theme-button-bg: #e2e8f0;
+  --theme-button-color: #2d3748;
+}
+/* Contenedor inferior */
+.home-bottom-container {
+  width: 100%;
+  height: 10%;
+  background-color: #0eff36; /* Color gris */
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  .home-container {
+      flex-direction: column;
+      text-align: center;
+      padding: 5%;
   }
 
-  /* Botón de configuración flotante */
-.settings-floating-button {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-    z-index: 1000;
+  .home-left-container, .home-right-container {
+      max-width: 100%;
+      padding: 5%;
   }
-  
-  .settings-icon {
-    width: 28px;
-    height: 28px;
-    color: var(--settings-icon-color);
-    transition: all 0.3s ease;
+
+  .home-right-container {
+      margin-top: 5%;
   }
-  
-  .settings-floating-button:hover .settings-icon {
-    transform: rotate(30deg) scale(1.1);
+
+  .home-avatar-container {
+      width: auto;
+      height: 90%;
+      border-width: 2vw;
   }
-  
-  /* Colores según el tema */
-  .dark-theme {
-    --settings-icon-color: rgba(255, 255, 255, 0.8);
+
+  .home-circle-canvas {
+      width: 70%; /* Ajusta el tamaño del canvas en pantallas pequeñas */
   }
-  
-  .light-theme {
-    --settings-icon-color: rgba(0, 0, 0, 0.8);
-  }
-  
-  .dark-theme .settings-floating-button:hover .settings-icon {
-    color: white;
-  }
-  
-  .light-theme .settings-floating-button:hover .settings-icon {
-    color: black;
-  }
+}

@@ -10,9 +10,9 @@ function Start() {
   const videoRef = useRef(null);
   const { isDarkTheme, toggleTheme } = useTheme();
 
-  const newLocal = <div className="left-container">
+  const newLocal = <div className="start-left-container">
     <div
-      className="avatar-container"
+      className="start-avatar-container"
       onMouseEnter={() => {
         videoRef.current.currentTime = 0; // Reinicia el video al inicio
         videoRef.current?.play();
@@ -26,7 +26,7 @@ function Start() {
     >
       <video
         ref={videoRef}
-        className="avatar-video"
+        className="start-avatar-video"
         autoPlay={true} // No se reproduce automáticamente
         muted
         playsInline
@@ -40,19 +40,19 @@ function Start() {
     <div className={`start-container ${isDarkTheme ? 'dark-theme' : 'light-theme'}`}>
       {/* Botón flotante de cambio de tema */}
       <button
-        className="theme-toggle-button"
+        className="start-theme-toggle-button"
         onClick={toggleTheme}
         aria-label="Cambiar tema"
       >
         {isDarkTheme ?
-          <FaLightbulb className="theme-icon" /> :
-          <FaRegLightbulb className="theme-icon" />
+          <FaLightbulb className="start-theme-icon" /> :
+          <FaRegLightbulb className="start-theme-icon" />
         }
       </button>
 
       {newLocal}
 
-      <div className="right-container">
+      <div className="start-right-container">
         <h1>Bienvenido a Vigil</h1>
         <p>En esta web impulsada por IA, podrás controlar o monitorizar el nivel de sueño al conducir.</p>
         <button
