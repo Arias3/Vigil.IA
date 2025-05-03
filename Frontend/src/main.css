@@ -1,0 +1,78 @@
+/* src/styles/main.css */
+
+/* Estilos globales para los temas */
+body.dark-theme {
+  background-color: #101728;
+  color: white;
+}
+
+body.light-theme {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+/* Estilos que se aplicarán a todos los componentes en modo oscuro */
+.dark-theme {
+  --bg-color: #101728;
+  --text-color: white;
+  --border-color: #2a3a5a;
+  --card-bg: #1a2238;
+}
+
+/* Estilos que se aplicarán a todos los componentes en modo claro */
+.light-theme {
+  --bg-color: #f5f5f5;
+  --text-color: #333;
+  --border-color: #e0e0e0;
+  --card-bg: white;
+}
+
+/* Reseteo de márgenes y bordes */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Estilos generales */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+}
+
+.App {
+  text-align: center;
+}
+
+.App-header {
+  background-color: #282c34;
+  color: white;
+  padding: 20px;
+}
+
+main {
+  padding: 0px;
+}
+
+footer {
+  background-color: #282c34;
+  color: white;
+  padding: 10px;
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+}
+
+nav {
+  margin: 20px 0;
+}
+
+nav a {
+  margin: 0 10px;
+  text-decoration: none;
+  color: #61dafb;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}

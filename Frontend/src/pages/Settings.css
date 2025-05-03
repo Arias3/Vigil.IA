@@ -1,0 +1,408 @@
+/* Estilos generales */
+.settings-container {
+  position: relative;
+  min-height: 100vh;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Centra todo el contenido */
+  transition: background-color 0.3s ease;
+  overflow-x: hidden;
+}
+
+/* Estilos por tema */
+.dark-theme {
+  --button-bg: #4a8fe7;
+  --button-text: white;
+  --button-hover-bg: #3a7bd5;
+  --control-bg: #1a2238;
+  --slider-bg: #2d3748;
+  --slider-thumb: #4a8fe7;
+  --avatar-selected-glow: rgba(156, 199, 255, 0.7);
+  --button-hover-bg: rgba(255, 255, 255, 0.1);
+  --text-color: white;
+  --bg-color: #101728;
+  --border-color: #2a3a5a;
+  --icon-color: white;
+  --avatar-border: #3a3a4a;
+  --avatar-hover-border: #4a8fe7;
+  --scrollbar-track: #1a2238;
+  --scrollbar-thumb: #3a4a6b;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  overflow-x: hidden;
+}
+
+.light-theme {
+  --button-bg: #1f43bc;
+  --button-text: white;
+  --button-hover-bg: #0d2a7d;
+  --control-bg: #929292;
+  --slider-bg: #e2e8f0;
+  --slider-thumb: #1f43bc;
+  --avatar-selected-glow: rgba(0, 26, 110, 0.7);
+  --button-hover-bg: rgba(0, 0, 0, 0.05);
+  --text-color: #333;
+  --bg-color: #f5f5f5;
+  --border-color: #e0e0e0;
+  --icon-color: #333;
+  --avatar-border: #d1d1d1;
+  --avatar-hover-border: #1f43bc;
+  --scrollbar-track: #e0e0e0;
+  --scrollbar-thumb: #b0b0b0;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  overflow-x: hidden;
+}
+
+.reset-button {
+  padding: 8px 16px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background 0.3s;
+}
+
+.reset-button:hover {
+  background: #cc0000;
+}
+
+.alarm-controls {
+  margin-top: 20px;
+  padding: 15px;
+  background: var(--control-bg);
+  border-radius: 8px;
+}
+
+.alarm-label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.test-alarm-button {
+  margin-top: 10px;
+  padding: 8px 15px;
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+/* Elementos flotantes */
+.floating-back-button,
+.floating-theme-button {
+  position: fixed;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 12px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.floating-back-button {
+  top: 20px;
+  left: 20px;
+}
+
+.floating-theme-button {
+  top: 20px;
+  right: 20px;
+}
+
+.floating-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--icon-color);
+  transition: transform 0.3s ease;
+}
+
+.floating-back-button:hover,
+.floating-theme-button:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.floating-back-button:hover .floating-icon,
+.floating-theme-button:hover .floating-icon {
+  transform: scale(1);
+}
+
+/* Título */
+.settings-title {
+  text-align: center;
+  margin: 30px 0 1px;
+  font-size: 2rem;
+  color: var(--text-color);
+}
+
+/* Contenedor de avatares */
+.avatars-container {
+  width: 100%;
+  max-width: 800px;
+  /* Limita el ancho máximo */
+  padding: 10px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  display: flex;
+  justify-content: center;
+  /* Centra horizontalmente */
+}
+
+/* Elimina el padding lateral del scroll para mejor centrado */
+.avatars-scroll {
+  display: flex;
+  gap: 40px;
+  padding: 20px 0;
+  /* Quitamos el padding lateral */
+  min-width: min-content;
+  justify-content: center;
+  /* Centra los avatares */
+}
+
+.avatar-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: auto;
+  position: relative;
+}
+
+/* Sombra personalizada para PNG */
+.avatar-image {
+  width: 150px;
+  height: auto;
+  object-fit: contain;
+  transition: all 0.3s ease;
+  /* filter: drop-shadow(0 4px 8px rgba(29, 146, 25, 0.2)); */
+  border-radius: 0;
+}
+
+/* Estado seleccionado */
+.avatar-option.selected .avatar-image {
+  filter: drop-shadow(0 0 15px var(--avatar-selected-glow));
+}
+
+/* Contenido principal */
+.settings-content {
+  max-width: 800px;
+  margin: 40px auto 0;
+  padding: 20px;
+  flex-grow: 1;
+  text-align: center;
+}
+
+.settings-content p {
+  color: var(--text-color);
+  font-size: 1.1rem;
+}
+
+/* Estados de carga y permisos */
+.camera-loading,
+.camera-permission-denied {
+  text-align: center;
+  padding: 20px;
+  background: var(--control-bg);
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.retry-button {
+  padding: 10px 20px;
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: background 0.3s;
+}
+
+.retry-button:hover {
+  background: var(--button-hover-bg);
+}
+
+/* Contenedor principal de ajustes */
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Contenedor de controles de cámara */
+.camera-controls-container {
+  min-width: auto;
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  background: var(--control-bg);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Grupos de controles */
+.control-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 250px;
+  justify-content: center;
+}
+
+/* Etiquetas */
+.control-label {
+  font-size: 1rem;
+  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Select de cámara */
+.camera-select {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* Vista previa de video */
+.video-preview-container {
+  align-self: center;
+  justify-content: center;
+  width: 70%;
+  aspect-ratio: 1/1;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.camera-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: filter 0.3s ease;
+}
+
+/* Sliders */
+.control-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--slider-bg);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.control-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--slider-thumb);
+  cursor: pointer;
+}
+
+/* Checkbox */
+.control-checkbox {
+  margin-right: 8px;
+  width: 16px;
+  height: 16px;
+}
+
+.save-settings-button {
+  background: linear-gradient(to right, #1f43bc, #37b3fd);
+  color: white;
+  border: none;
+  font-size: 1.2vw;
+  padding: 1% 10%;
+  border-radius: 300% / 80vw;
+  cursor: pointer;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.save-settings:hover {
+  background: linear-gradient(to right, #1a38a0, #2d9cdb);
+  box-shadow: 0 0 10px 2px #37b3fd;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+  .camera-controls-container {
+    flex-direction: column;
+    overflow: hidden;
+
+  }
+
+  .control-group {
+    min-width: 100%;
+  }
+
+  .settings-title {
+    margin: 50px 0 30px;
+    font-size: 1.8rem;
+  }
+
+  .floating-back-button,
+  .floating-theme-button {
+    padding: 10px;
+  }
+
+  .floating-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .avatars-scroll {
+    gap: 20px;
+    padding: 10px;
+  }
+
+  .avatar-image {
+    width: 120px;
+    height: auto;
+  }
+
+  .avatar-label {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-title {
+    margin: 40px 0 20px;
+    font-size: 1.5rem;
+  }
+
+  .avatar-image {
+    width: 100px;
+    height: auto;
+  }
+
+  .settings-content p {
+    font-size: 1rem;
+    overflow: hidden;
+  }
+}
