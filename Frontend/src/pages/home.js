@@ -62,7 +62,8 @@ function Home() {
   const [avatarCaption, setAvatarCaption] = useState(getAvatarCaption(percent));
   const [avatarImage, setAvatarImage] = useState(getAvatarImage(gesture));
 
-  const [dialogOpen, setDialogOpen] = useState(true); 
+  const [dialogOpen, setDialogOpen] = useState(true);
+  const [cameraPermissionGranted, setCameraPermissionGranted] = useState(false);
 
   // Efecto para actualizar los componentes cuando cambian percent o gesture
   useEffect(() => {
@@ -71,12 +72,40 @@ function Home() {
     setAvatarImage(getAvatarImage(gesture)); // Actualiza la imagen del avatar
   }, [percent, gesture]);
 
-  const handleDialogClose = () => {
-    setDialogOpen(false);
-    startCameraAPI(); // Llama a la función para iniciar la API
+  // Efecto para manejar permisos de cámara
+  useEffect(() => {
+    if (cameraPermissionGranted) {
+      console.log("Permisos de cámara otorgados. Iniciando la API...");
+      startCameraAPI(); // Inicia la API si los permisos fueron otorgados
+    }
+  }, [cameraPermissionGranted]);
+
+  // Función para verificar y solicitar permisos de la cámara
+  const requestCameraPermission = async () => {
+    try {
+      const permission = await navigator.permissions.query({ name: 'camera' });
+      if (permission.state === 'granted') {
+        console.log("Permisos de cámara ya otorgados.");
+        setCameraPermissionGranted(true);
+        setDialogOpen(false); // Cierra el diálogo
+        startCameraAPI(); // Inicia la API
+      } else if (permission.state === 'prompt') {
+        // Si el estado es "prompt", solicita permisos con getUserMedia
+        await navigator.mediaDevices.getUserMedia({ video: true });
+        setCameraPermissionGranted(true);
+        setDialogOpen(false);
+        startCameraAPI();
+      } else {
+        console.error("Permiso de cámara denegado.");
+        setCameraPermissionGranted(false);
+      }
+    } catch (error) {
+      console.error("Error al solicitar permisos de cámara:", error);
+      setCameraPermissionGranted(false);
+    }
   };
 
-  const goToSettings = () => {
+  const GoToSettings = () => {
     navigate('/settings');
   };
 
@@ -88,7 +117,7 @@ function Home() {
   return (
     <div className={`home-container ${isDarkTheme ? 'dark-theme' : 'light-theme'}`}>
       {/* Diálogo para notificar sobre el uso de la cámara */}
-      <Dialog open={dialogOpen} onClose={handleDialogClose}>
+      <Dialog open={dialogOpen}>
         <DialogTitle>Permiso para usar la cámara</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -96,18 +125,18 @@ function Home() {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={goToSettings} color="primary">
-            Configuración
+          <Button onClick={requestCameraPermission} color="primary">
+            Iniciar Captura
           </Button>
-          <Button onClick={handleDialogClose} color="primary" autoFocus>
-            Continuar
+          <Button onClick={GoToSettings} color="primary">
+            Configuración
           </Button>
         </DialogActions>
       </Dialog>
       {/* Botón de configuración flotante */}
       <button
         className="home-settings-floating-button"
-        onClick={goToSettings}
+        onClick={GoToSettings}
         aria-label="Configuración"
       >
         <IoMdSettings className="home-settings-icon" />
