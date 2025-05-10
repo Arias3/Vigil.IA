@@ -5,11 +5,9 @@
   align-items: center;
   transition: background-color 0.3s ease;
   flex-wrap: nowrap;
-    justify-content: space-around;
+  justify-content: space-around;
 
 }
-
-
 
 /* Tema oscuro (valores por defecto) */
 .dark-theme .home-container {
@@ -74,45 +72,97 @@
   transition: all 0.3s ease;
 }
 
-.home-avatar-video {
+.home-avatar-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
 }
 
-.home-avatar-video::-webkit-media-controls {
+.home-avatar-image::-webkit-media-controls {
   display: none !important;
 }
 
 /* Contenedor derecho (Canvas) */
 .home-right-container {
+  height: auto;
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 10px;
 }
 
 .home-circle-canvas {
-  width: 80%; /* Ajusta el tamaño del canvas */
-  aspect-ratio: 1; /* Mantiene el canvas cuadrado */
-  border-radius: 50%; /* Hace el canvas circular */
+  width: 100%;
+  /* Ajusta el tamaño del canvas */
+  height: auto;
+  max-width: 500px;
+  /* Tamaño máximo del canvas */
+  aspect-ratio: 1;
+  /* Mantiene el canvas cuadrado */
+  border-radius: 50%;
+  /* Hace el canvas circular */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Tema oscuro */
 .dark-theme .home-circle-canvas {
-  background-color: #f8f8f8; /* Fondo oscuro */
-  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1); /* Sombra clara */
+  background-color: #f8f8f8;
+  /* Fondo oscuro */
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
+  /* Sombra clara */
 }
 
 /* Tema claro */
 .light-theme .home-circle-canvas {
-  background-color: rgb(65, 113, 204); /* Fondo claro */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Sombra oscura */
+  background-color: rgb(65, 113, 204);
+  /* Fondo claro */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  /* Sombra oscura */
 }
+
+/* Estilos para la cámara */
+.camera-preview-container {
+  width: 100%;
+  max-width: 640px;
+  height: 480px;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #000;
+  position: relative;
+}
+
+.camera-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform-origin: center center;
+}
+
+.camera-loading,
+.camera-permission-denied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 480px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.camera-permission-denied button {
+  margin-top: 15px;
+  padding: 8px 16px;
+  background-color: #1f43bc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
 
 /* Botón de configuración flotante */
 .home-settings-floating-button {
@@ -121,7 +171,8 @@
   right: 30px;
   width: 50px;
   height: 50px;
-  border-radius: 12px; /* Esquinas redondeadas */
+  border-radius: 12px;
+  /* Esquinas redondeadas */
   background: var(--theme-button-bg);
   color: var(--theme-button-color);
   border: none;
@@ -146,21 +197,28 @@
 }
 
 .home-avatar-label {
-  font-size: 2.5rem; /* Tamaño grande para el título */
-  font-weight: bold; /* Negrita para resaltar */
-  text-align: center; /* Centrado */
-  margin-top: 20px; /* Espaciado superior */
-  transition: color 0.3s ease; /* Transición suave para el cambio de color */
+  font-size: 2.5rem;
+  /* Tamaño grande para el título */
+  font-weight: bold;
+  /* Negrita para resaltar */
+  text-align: center;
+  /* Centrado */
+  margin-top: 20px;
+  /* Espaciado superior */
+  transition: color 0.3s ease;
+  /* Transición suave para el cambio de color */
 }
 
 /* Estilo para modo oscuro */
 .dark-theme .home-avatar-label {
-  color: #f5f4f4; /* Color claro para texto en modo oscuro */
+  color: #f5f4f4;
+  /* Color claro para texto en modo oscuro */
 }
 
 /* Estilo para modo claro */
 .light-theme .home-avatar-label {
-  color: #333; /* Color oscuro para texto en modo claro */
+  color: #333;
+  /* Color oscuro para texto en modo claro */
 }
 
 .home-settings-floating-button:hover .home-settings-icon {
@@ -177,11 +235,11 @@
   --theme-button-bg: #e2e8f0;
   --theme-button-color: #2d3748;
 }
+
 /* Contenedor inferior */
 .home-bottom-container {
   width: 100%;
   height: 10%;
-  background-color: #0eff36; /* Color gris */
   position: absolute;
   bottom: 0;
   left: 0;
@@ -190,27 +248,45 @@
 /* Responsive para móviles */
 @media (max-width: 768px) {
   .home-container {
-      flex-direction: column;
-      text-align: center;
-      padding: 5%;
+    flex-direction: column;
+    text-align: center;
+    padding: 5%;
   }
 
-  .home-left-container, .home-right-container {
-      max-width: 100%;
-      padding: 5%;
+  .home-left-container {
+    max-width: 90%;
+    padding: 5%;
+    gap: 5px;
   }
 
   .home-right-container {
-      margin-top: 5%;
+    max-width: 90%;
+    padding: 5%;
+    gap: 5px;
+    margin-top: 5%;
+    width: 70%;
   }
 
   .home-avatar-container {
-      width: auto;
-      height: 90%;
-      border-width: 2vw;
+    width: 35%;
+    /* Reduce el tamaño del avatar */
+    height:auto;
+    /* Reduce el tamaño del avatar */
+    border-width: 1.5vw;
+    /* Ajusta el grosor del borde */
   }
 
-  .home-circle-canvas {
-      width: 70%; /* Ajusta el tamaño del canvas en pantallas pequeñas */
+  .home-avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .home-avatar-label {
+    font-size: 1.8rem;
+    /* Reduce el tamaño del texto del caption */
+    margin-top: 15px;
+    /* Ajusta el espaciado superior */
   }
 }
