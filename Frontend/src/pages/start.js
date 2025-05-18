@@ -5,10 +5,29 @@ import { FaLightbulb, FaRegLightbulb } from "react-icons/fa6";
 import './start.css';
 import animationVideo from '../assets/saludo.mp4';
 
+// Función simple para generar un UUID
+function generateToken() {
+  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+    (
+      c ^
+      (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+    ).toString(16)
+  );
+}
+
 function Start() {
   const navigate = useNavigate();
   const videoRef = useRef(null);
   const { isDarkTheme, toggleTheme } = useTheme();
+
+  const handleStart = () => {
+    // Si no hay token, lo genera y lo guarda
+    if (!localStorage.getItem('token')) {
+      const token = generateToken();
+      localStorage.setItem('token', token);
+    }
+    navigate('/home');
+  };
 
   const newLocal = <div className="start-left-container">
     <div
@@ -57,7 +76,7 @@ function Start() {
         <p>En esta web impulsada por IA, podrás controlar o monitorizar el nivel de sueño al conducir.</p>
         <button
           className="start-button"
-          onClick={() => navigate('/home')}
+          onClick={handleStart}
         >
           Empezar
         </button>

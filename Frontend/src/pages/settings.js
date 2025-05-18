@@ -15,7 +15,6 @@ function Settings() {
   const { isDarkTheme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const videoRef = useRef(null);
-  const [isGrayscale] = useState(true); // Blanco y negro por defecto
   const [cameras, setCameras] = useState([]);
   const [selectedCamera, setSelectedCamera] = useState('');
   const [stream, setStream] = useState(null);
@@ -186,11 +185,10 @@ function Settings() {
       videoRef.current.style.filter = `
         brightness(${brightness}%)
         contrast(${contrast}%)
-        ${isGrayscale ? 'grayscale(100%)' : ''}
       `;
       videoRef.current.style.transform = `scale(${zoom / 80})`; // Aplicar zoom
     }
-  }, [brightness, contrast, isGrayscale, zoom]);
+  }, [brightness, contrast, zoom]);
 
   // Iniciar cámara
   const startCamera = useCallback(async (deviceId) => {
