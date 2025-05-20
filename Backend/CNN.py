@@ -11,7 +11,7 @@ app = Flask(__name__)
 CORS(app)  # Habilita CORS para todas las rutas
 
 # Cargar el modelo .h5
-model = tf.keras.models.load_model("./models/model1705.h5")
+model = tf.keras.models.load_model("./models/model1805.h5")
 class_names = ["Attention", "Yawning", "EyesClosed"]  # Clases del modelo (ajustadas)
 mp_face_detection = mp.solutions.face_detection
 

@@ -68,8 +68,8 @@ function Home() {
   const [selectedAlarm, setSelectedAlarm] = useState('default'); // Correcto
 
   // Estados para percent y gesture
-  const [percent] = useState(percentInput || 0); // Valor inicial de percent
-  const [gesture] = useState(gestureInput || 0); // Valor inicial de gesture
+  const [percent] = useState(percentInput || 90); // Valor inicial de percent
+  const [gesture] = useState(gestureInput || 3); // Valor inicial de gesture
 
   // Estados derivados
   const [strokeColor, setStrokeColor] = useState(GradePercent(percent));
