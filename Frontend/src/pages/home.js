@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { IoMdSettings } from "react-icons/io";
@@ -11,6 +11,16 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
 import { processImage } from '../services/apiService';
 import './Home.css';
+import alarm1 from '../assets/audio/alarm1.mp3';
+import alarm2 from '../assets/audio/alarm2.mp3';
+import alarm3 from '../assets/audio/alarm3.mp3';
+
+const alarms = {
+  alarm1: { name: "Alarma 1", file: alarm1 },
+  alarm2: { name: "Alarma 2", file: alarm2 },
+  alarm3: { name: "Alarma 3", file: alarm3 }
+};
+
 
 // Función para mapear el porcentaje a un color (de verde a rojo)
 const GradePercent = (percent, gesture) => {
@@ -33,27 +43,32 @@ const getAvatarCaption = (percent) => {
   return "¡Estás completamente atento, sigue así!";
 };
 
-// Función para obtener la imagen del avatar según el gesto
-const getAvatarImage = (gesture) => {
-  switch (gesture) {
-    case 0:
-      return "0.png"; // No face detected
-    case 1:
-      return "1.png"; // Attention
-    case 2:
-      return "3.png"; // EyesClosed
-    case 3:
-      return "2.png"; // Yawning
-    default:
-      return "0.png"; // Imagen predeterminada
-  }
+// Función para obtener la imagen del avatar según el gesto y el avatar seleccionado
+const getAvatarImage = (gesture, avatarNum = '1') => {
+  if (!avatarNum) avatarNum = '1';
+  if (gesture === 0) return `0.png`; // No face detected
+  if (gesture === 1) return `a${avatarNum}.png`; // Attention
+  if (gesture === 2) return `c${avatarNum}.png`; // EyesClosed
+  if (gesture === 3) return `b${avatarNum}.png`; // Yawning
+  return `a${avatarNum}.png`;
 };
-const percentInput = 0; // Valor de ejemplo para el porcentaje
-const gestureInput = 0; // Valor de ejemplo para el gesto
 
 function Home() {
   const navigate = useNavigate();
   const { isDarkTheme } = useTheme();
+
+  // Estados actualizados
+  const [percent, setPercent] = useState(0); // Ahora es mutable
+  const [gestureAvatar, setGestureAvatar] = useState(1); // 1 = Attention por defecto
+  const [gesture] = useState(0); // Ahora es mutable
+  const [strokeColor, setStrokeColor] = useState(GradePercent(0, 0));
+  const [avatarCaption, setAvatarCaption] = useState(getAvatarCaption(0));
+  const [avatarImage, setAvatarImage] = useState(getAvatarImage(1, '1'));
+
+  useEffect(() => {
+    const savedAvatar = localStorage.getItem('selectedAvatar') || '1';
+    setSelectedAvatar(savedAvatar);
+  }, []);
 
   // Estados para configuraciones
   // eslint-disable-next-line
@@ -63,18 +78,9 @@ function Home() {
   // eslint-disable-next-line
   const [zoom, setZoom] = useState(1); // Correcto
   // eslint-disable-next-line
-  const [selectedAvatar, setSelectedAvatar] = useState(0); // Correcto
+  const [selectedAvatar, setSelectedAvatar] = useState('1'); // Siempre string
   // eslint-disable-next-line
   const [selectedAlarm, setSelectedAlarm] = useState('default'); // Correcto
-
-  // Estados para percent y gesture
-  const [percent] = useState(percentInput || 90); // Valor inicial de percent
-  const [gesture] = useState(gestureInput || 3); // Valor inicial de gesture
-
-  // Estados derivados
-  const [strokeColor, setStrokeColor] = useState(GradePercent(percent));
-  const [avatarCaption, setAvatarCaption] = useState(getAvatarCaption(percent));
-  const [avatarImage, setAvatarImage] = useState(getAvatarImage(gesture));
 
   const [dialogOpen, setDialogOpen] = useState(true);
   const [cameraPermissionGranted, setCameraPermissionGranted] = useState(false);
@@ -83,21 +89,111 @@ function Home() {
   const [transitionVideo, setTransitionVideo] = useState(null); // Video de transición
   const [showTransition, setShowTransition] = useState(false); // Mostrar video
 
-  const getTransitionVideo = (from, to) => {
-    // Mapear los gestos a letras
-    const map = { 1: 'a', 3: 'b', 2: 'c' }; // 1: Atento, 3: Boztezo, 2: Ojos cerrados
-    if (from === to) return null;
-    if (!map[from] || !map[to]) return null;
-    // Ejemplo: a-b1, a-b2, etc. Puedes alternar entre 1 y 2 si quieres variedad
-    return `${map[from]}-${map[to]}1.mp4`;
+  const videoRef = useRef(null);
+  const audioRef = useRef(null);
+  const streamRef = useRef(null);
+  const capturingRef = useRef(false);
+
+  useEffect(() => {
+    const savedAvatar = localStorage.getItem('selectedAvatar');
+    if (savedAvatar) {
+      setSelectedAvatar(savedAvatar);
+    } else {
+      setSelectedAvatar('1');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (gestureAvatar === 2 || percent > 70) { // 2 = EyesClosed
+      const selected = localStorage.getItem('selectedAlarm') || 'alarm1';
+      if (audioRef.current) {
+        if (audioRef.current.paused || audioRef.current.ended) {
+          audioRef.current.src = alarms[selected].file;
+          audioRef.current.play().catch(e => console.log("Error al reproducir:", e));
+        }
+      }
+    } else {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    }
+  }, [gestureAvatar, percent]);
+
+  useEffect(() => {
+    if (showTransition && videoRef.current) {
+      videoRef.current.playbackRate = 2;
+    }
+  }, [showTransition, transitionVideo]);
+
+  const [gestureHistory, setGestureHistory] = useState([]);
+
+  const postprocessGesture = (newGesture) => {
+    setGestureHistory(prev => {
+      const updated = [...prev, newGesture].slice(-5);
+      return updated;
+    });
   };
+
+  useEffect(() => {
+    if (gestureHistory.length === 5 && gestureHistory.every(g => g === gestureHistory[0])) {
+      setGestureAvatar(gestureHistory[0]);
+    }
+    // eslint-disable-next-line
+  }, [gestureHistory]);
+
+
+
+
+  // Función para obtener el video de transición entre gestos
+  function getTransitionVideo(prevGesture, nextGesture) {
+    // Map gestos a letras
+    const gestureMap = { 1: 'a', 3: 'b', 2: 'c' }; // 1: Atento, 3: Bostezo, 2: Ojos cerrados
+    const avatarNum = localStorage.getItem('selectedAvatar') || '1';
+
+    // Si no hay transición o es el mismo gesto, no hay video
+    if (prevGesture === nextGesture) return null;
+
+    // Solo existen videos directos: a-b, a-c, b-c (y sus inversos)
+    const directTransitions = [
+      ['a', 'b'],
+      ['a', 'c'],
+      ['b', 'c'],
+    ];
+
+    const from = gestureMap[prevGesture];
+    const to = gestureMap[nextGesture];
+
+    // Buscar si la transición es directa
+    const isDirect = directTransitions.some(
+      ([start, end]) => start === from && end === to
+    );
+
+    if (isDirect) {
+      // Ejemplo: a-b1.mp4
+      return { src: `transitions/${from}-${to}${avatarNum}.mp4`, reverse: false };
+    }
+
+    // Buscar si la transición es inversa (reversa)
+    const isReverse = directTransitions.some(
+      ([start, end]) => start === to && end === from
+    );
+
+    if (isReverse) {
+      // Ejemplo: a-b1.mp4 pero en reversa
+      return { src: `transitions/${to}-${from}${avatarNum}.mp4`, reverse: true };
+    }
+
+    // Si no hay video para esa transición, retorna null
+    return null;
+  }
 
   // Efecto para actualizar los componentes cuando cambian percent o gesture
   useEffect(() => {
-    setStrokeColor(GradePercent(percent, gesture)); // Actualiza el color dinámico
-    setAvatarCaption(getAvatarCaption(percent)); // Actualiza el caption del avatar
-    setAvatarImage(getAvatarImage(gesture)); // Actualiza la imagen del avatar
-  }, [percent, gesture]);
+    setStrokeColor(GradePercent(percent, gestureAvatar));
+    setAvatarCaption(getAvatarCaption(percent));
+    setAvatarImage(getAvatarImage(gestureAvatar, selectedAvatar));
+  }, [percent, gestureAvatar, selectedAvatar]);
 
   // Efecto para iniciar la captura de video cuando se otorgan permisos
   useEffect(() => {
@@ -110,17 +206,16 @@ function Home() {
 
   useEffect(() => {
     if (prevGesture !== gesture) {
-      const videoName = getTransitionVideo(prevGesture, gesture);
-      if (videoName) {
-        setTransitionVideo(videoName);
+      const transition = getTransitionVideo(prevGesture, gesture);
+      if (transition) {
+        setTransitionVideo(transition);
         setShowTransition(true);
-        // Oculta el video después de 2 segundos y actualiza el avatar
         setTimeout(() => {
           setShowTransition(false);
           setPrevGesture(gesture);
           setAvatarImage(getAvatarImage(gesture));
-        }, 2000);
-        return; // No actualices el avatar aún
+        }, 2000); // Duración del video
+        return;
       }
     }
     setAvatarImage(getAvatarImage(gesture));
@@ -128,18 +223,38 @@ function Home() {
     // eslint-disable-next-line
   }, [gesture]);
 
+  const stopCameraAPI = useCallback(() => {
+    capturingRef.current = false; // Detén el ciclo de captura
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+  }, []);
+
+
+
   const GoToSettings = () => {
+    stopCameraAPI();
     navigate('/settings');
   };
+
+  useEffect(() => {
+    return () => {
+      stopCameraAPI();
+    };
+  }, [stopCameraAPI]);
 
   const startCameraAPI = useCallback(async () => {
     console.log("Iniciando la API de la cámara...");
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      streamRef.current = stream;
+      capturingRef.current = true; // Inicia la captura
+
       const video = document.createElement('video');
       video.srcObject = stream;
-      video.play();
+      await video.play();
 
       const canvas = document.createElement('canvas');
       canvas.width = 112;
@@ -148,6 +263,7 @@ function Home() {
 
       // Captura imágenes a 1 FPS
       const captureFrame = () => {
+        if (!capturingRef.current) return;
         // Leer valores de localStorage
         const brightness = parseInt(localStorage.getItem('brightness') || '100', 10);
         const contrast = parseInt(localStorage.getItem('contrast') || '100', 10);
@@ -179,23 +295,27 @@ function Home() {
           if (blob) {
             try {
               const data = await processImage(blob);
-              setAvatarCaption(getAvatarCaption(data.confidence * 100));
-              setAvatarImage(getAvatarImage(data.gesture));
+              // Postprocesamiento del gesto
+              // Actualiza el confidence directamente, sin filtro
+              console.log("Gesto detectado:", data.gesture_name);
+              setPercent(data.confidence * 100);
+              postprocessGesture(data.gesture);
+
+              // El resto de tus actualizaciones de estado van aquí,
+              // pero el gesto mostrado será el filtrado por el historial
             } catch (error) {
               console.error("Error al enviar la imagen:", error.message);
             }
           }
         }, 'image/jpeg');
 
-        setTimeout(captureFrame, 2000); // Captura el siguiente frame después de 1 segundo
+        setTimeout(() => {
+          if (capturingRef.current) captureFrame();
+        }, 500);
       };
 
       captureFrame(); // Inicia la captura de frames
 
-      // Detener la cámara cuando sea necesario
-      return () => {
-        stream.getTracks().forEach((track) => track.stop());
-      };
     } catch (error) {
       console.error("Error al iniciar la captura de video:", error);
     }
@@ -219,20 +339,6 @@ function Home() {
     } catch (error) {
       console.error("Error al solicitar permisos de cámara:", error);
       setCameraPermissionGranted(false);
-    }
-  };
-  // eslint-disable-next-line
-  const sendImageToAPI = async (imageData) => {
-    try {
-      const blob = await fetch(imageData).then((res) => res.blob());
-      const data = await processImage(blob); // Llama a la función del servicio
-      console.log("Respuesta del backend:", data);
-
-      // Actualiza la interfaz según el resultado
-      setAvatarCaption(getAvatarCaption(data.confidence * 100));
-      setAvatarImage(getAvatarImage(data.gesture));
-    } catch (error) {
-      console.error("Error al enviar la imagen:", error.message);
     }
   };
 
@@ -270,12 +376,23 @@ function Home() {
         {/* Contenedor izquierdo (Avatar) */}
         <div className="home-left-container">
           <div className="home-avatar-container">
+
             {showTransition && transitionVideo ? (
               <video
-                src={require(`../assets/${transitionVideo}`)}
+                ref={videoRef}
+                src={require(`../assets/${transitionVideo.src}`)}
                 autoPlay
                 onEnded={() => setShowTransition(false)}
-                style={{ width: 180, height: 180 }}
+                className="home-avatar-image"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  objectPosition: "center",
+                  borderRadius: "20%",
+                  transition: "all 0.3s ease",
+                  transform: transitionVideo.reverse ? "scaleX(-1)" : "none"
+                }}
               />
             ) : (
               <img
@@ -284,6 +401,7 @@ function Home() {
                 className="home-avatar-image"
               />
             )}
+
           </div>
           {/* Label debajo del avatar */}
           <div
@@ -296,7 +414,7 @@ function Home() {
 
         {/* Contenedor derecho (Canvas) */}
         <div className="home-right-container">
-          <CircleBar percent={percent} strokeColor={strokeColor} />
+          <CircleBar percent={Math.round(percent)} strokeColor={strokeColor} />
         </div>
       </div>
 
@@ -309,6 +427,7 @@ function Home() {
           transition: "background-color 0.3s ease", // Transición suave para el cambio de color
         }}
       ></div>
+      <audio ref={audioRef} style={{ display: 'none' }} />
     </div>
   );
 }
