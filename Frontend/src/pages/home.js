@@ -64,11 +64,8 @@ function Home() {
   const [strokeColor, setStrokeColor] = useState(GradePercent(0, 0));
   const [avatarCaption, setAvatarCaption] = useState(getAvatarCaption(0));
   const [avatarImage, setAvatarImage] = useState(getAvatarImage(1, '1'));
+  const [prevGestureAvatar, setPrevGestureAvatar] = useState(gestureAvatar);
 
-  useEffect(() => {
-    const savedAvatar = localStorage.getItem('selectedAvatar') || '1';
-    setSelectedAvatar(savedAvatar);
-  }, []);
 
   // Estados para configuraciones
   // eslint-disable-next-line
@@ -119,6 +116,25 @@ function Home() {
       }
     }
   }, [gestureAvatar, percent]);
+
+  useEffect(() => {
+    if (prevGestureAvatar !== gestureAvatar) {
+      const transition = getTransitionVideo(prevGestureAvatar, gestureAvatar);
+      if (transition) {
+        setTransitionVideo(transition);
+        setShowTransition(true);
+        setTimeout(() => {
+          setShowTransition(false);
+          setPrevGestureAvatar(gestureAvatar);
+          setAvatarImage(getAvatarImage(gestureAvatar, selectedAvatar));
+        }, 2000); // Duración del video
+        return;
+      }
+      setPrevGestureAvatar(gestureAvatar);
+      setAvatarImage(getAvatarImage(gestureAvatar, selectedAvatar));
+    }
+    // eslint-disable-next-line
+  }, [gestureAvatar, selectedAvatar]);
 
   useEffect(() => {
     if (showTransition && videoRef.current) {
@@ -203,25 +219,6 @@ function Home() {
     }
     // eslint-disable-next-line
   }, [cameraPermissionGranted]);
-
-  useEffect(() => {
-    if (prevGesture !== gesture) {
-      const transition = getTransitionVideo(prevGesture, gesture);
-      if (transition) {
-        setTransitionVideo(transition);
-        setShowTransition(true);
-        setTimeout(() => {
-          setShowTransition(false);
-          setPrevGesture(gesture);
-          setAvatarImage(getAvatarImage(gesture));
-        }, 2000); // Duración del video
-        return;
-      }
-    }
-    setAvatarImage(getAvatarImage(gesture));
-    setPrevGesture(gesture);
-    // eslint-disable-next-line
-  }, [gesture]);
 
   const stopCameraAPI = useCallback(() => {
     capturingRef.current = false; // Detén el ciclo de captura
