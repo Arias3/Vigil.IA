@@ -292,11 +292,11 @@ class CombinedConsecutiveAdjustment(tf.keras.layers.Layer):
         return config
     
 class ExtremeValueAdjustment(tf.keras.layers.Layer):
-    def _init_(self,
+    def __init__(self,
                  max_eyesclosed_streak=50,
                  max_attention_streak=240,
                  **kwargs):
-        super()._init_(**kwargs)
+        super().__init__(**kwargs)
         self.max_eyesclosed_streak = max_eyesclosed_streak
         self.max_attention_streak = max_attention_streak
 
@@ -319,27 +319,27 @@ class ExtremeValueAdjustment(tf.keras.layers.Layer):
         final_streaks = tf.map_fn(calculate_final_streak, eyesclosed_mask, fn_output_signature=tf.int32)
 
         def compute_increment(streak):
-            streak_f = tf.cast(streak, tf.float32)
-            increment = tf.constant(0.0, dtype=tf.float32)
+                streak_f = tf.cast(streak, tf.float32)
+                increment = tf.constant(0.0, dtype=tf.float32)
 
-            # Entre 1 y 15: Incremento lineal y rápido hasta un punto intermedio
-            case1 = tf.logical_and(streak_f >= 1, streak_f <= 15)
-            inc1 = 0.002 + 0.028 * (streak_f - 1) / 14  # Alcanza 0.03 al llegar a 15
+                # Entre 1 y 15: Incremento lineal y rápido hasta un punto intermedio
+                case1 = tf.logical_and(streak_f >= 1, streak_f <= 15)
+                inc1 = 0.002 + 0.028 * (streak_f - 1) / 14  # Alcanza 0.03 al llegar a 15
 
-            # Entre 16 y 40: Incremento más lento, usando una raíz cuadrada para desacelerar
-            case2 = tf.logical_and(streak_f > 15, streak_f <= 40)
-            inc2 = 0.03 + 0.025 * tf.sqrt((streak_f - 15) / 25)  # Sube otros 0.025, llegando a 0.055
+                # Entre 16 y 40: Incremento más lento, usando una raíz cuadrada para desacelerar
+                case2 = tf.logical_and(streak_f > 15, streak_f <= 40)
+                inc2 = 0.03 + 0.025 * tf.sqrt((streak_f - 15) / 25) # Sube otros 0.025, llegando a 0.055
 
-            # A partir de 41: Incremento muy suave con una función exponencial decreciente, acercándose a 0.065
-            case3 = streak_f > 40
-            extra = streak_f - 40
-            inc3 = 0.055 + (0.065 - 0.055) * (1 - tf.exp(-0.05 * extra))  # Sube los últimos 0.01 suavemente
+                # A partir de 41: Incremento muy suave con una función exponencial decreciente, acercándose a 0.065
+                case3 = streak_f > 40
+                extra = streak_f - 40
+                inc3 = 0.055 + (0.065 - 0.055) * (1 - tf.exp(-0.05 * extra)) # Sube los últimos 0.01 suavemente
 
-            increment = tf.where(case1, inc1, increment)
-            increment = tf.where(case2, inc2, increment)
-            increment = tf.where(case3, inc3, increment)
+                increment = tf.where(case1, inc1, increment)
+                increment = tf.where(case2, inc2, increment)
+                increment = tf.where(case3, inc3, increment)
 
-            return increment
+                return increment
 
         increments = tf.map_fn(compute_increment, final_streaks, fn_output_signature=tf.float32)
         safe_increment = tf.minimum(increments, 1.0 - tf.squeeze(index, axis=-1))
@@ -347,30 +347,7 @@ class ExtremeValueAdjustment(tf.keras.layers.Layer):
 
     def _apply_attention_adjustment(self, index, gestures):
         attention_mask = tf.cast(tf.equal(gestures, 0), tf.int32)
-        
-        # Calcular streak de atención (gestos no-cerrados consecutivos)
-        def calculate_attention_streak(mask):
-            streak = tf.argmax(tf.equal(mask, 1), output_type=tf.int32)
-            is_all = tf.reduce_all(tf.equal(mask, 0))
-            return tf.where(is_all, tf.shape(mask)[0], streak)
-        
-        attention_streaks = tf.map_fn(calculate_attention_streak, 
-                                    tf.cast(tf.not_equal(gestures, 0), tf.int32), 
-                                    fn_output_signature=tf.int32)
-        
-        # Calcular reducción por atención prolongada (nueva funcionalidad)
-        def compute_attention_reduction(att_streak):
-            att_streak_f = tf.cast(att_streak, tf.float32)
-            # Solo aplica después de 10 gestos de atención consecutivos
-            excess = tf.maximum(att_streak_f - 10, 0)
-            # 0.04% de reducción por cada gesto adicional, máximo 230 gestos (10+230=240)
-            return -0.0003 * tf.minimum(excess, 230)
-        
-        attention_reduction = tf.map_fn(compute_attention_reduction, 
-                                      attention_streaks, 
-                                      fn_output_signature=tf.float32)
-        
-        # Calcular reducción original por somnolencia
+
         def calculate_final_streak(mask):
             reversed_mask = tf.reverse(mask, axis=[0])
             streak = tf.argmax(tf.not_equal(reversed_mask, 0), output_type=tf.int32)
@@ -384,44 +361,25 @@ class ExtremeValueAdjustment(tf.keras.layers.Layer):
             streak_f = tf.cast(streak, tf.float32)
             reduction = tf.constant(0.0, dtype=tf.float32)
 
-            # Tramo 1: 120-160 - Reducción lineal suave
             case1 = tf.logical_and(streak_f >= 120, streak_f <= 160)
             red1 = -0.015 - 0.03 * (streak_f - 120) / 40
 
-            # Tramo 2: 160-220 - Reducción moderada
-            case2 = tf.logical_and(streak_f > 160, streak_f < 220)
-            red2 = -0.045 - 0.055 * (streak_f - 160) / 60
+            case2 = tf.logical_and(streak_f > 160, streak_f < 240)
+            red2 = -0.045 - 0.055 * (streak_f - 160) / 79
 
-            # Tramo 3: 220-230 - Reducción más fuerte pero pausada
-            case3 = tf.logical_and(streak_f >= 220, streak_f < 230)
-            red3 = -0.12 - 0.12 * (streak_f - 220) / 10
-
-            # Tramo 4: 230-240 - Reducción más agresiva pero pausada
-            case4 = tf.logical_and(streak_f >= 230, streak_f < 240)
-            red4 = -0.24 - 0.3 * (streak_f - 230) / 10
-
-            # Caso final: exactamente 240 - Reducción completa
-            case5 = tf.equal(streak_f, 240)
-            red5 = -idx
+            case3 = tf.equal(streak_f, 240)
+            red3 = -idx
 
             reduction = tf.where(case1, red1, reduction)
             reduction = tf.where(case2, red2, reduction)
             reduction = tf.where(case3, red3, reduction)
-            reduction = tf.where(case4, red4, reduction)
-            reduction = tf.where(case5, red5, reduction)
 
             return reduction
 
         index_flat = tf.squeeze(index, axis=-1)
         input_tuple = (final_streaks, index_flat)
-        drowsiness_reduction = tf.map_fn(compute_reduction, input_tuple, fn_output_signature=tf.float32)
-        
-        # Combinar ambas reducciones
-        total_reduction = drowsiness_reduction + attention_reduction
-        
-        # Asegurar que la reducción total no exceda el índice disponible
-        safe_reduction = tf.maximum(total_reduction, -index_flat)
-        
+        reductions = tf.map_fn(compute_reduction, input_tuple, fn_output_signature=tf.float32)
+        safe_reduction = tf.maximum(reductions, -index_flat)
         return index + tf.expand_dims(safe_reduction, axis=-1)
 
     def get_config(self):
