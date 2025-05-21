@@ -170,38 +170,14 @@ function Home() {
     // Si no hay transición o es el mismo gesto, no hay video
     if (prevGesture === nextGesture) return null;
 
-    // Solo existen videos directos: a-b, a-c, b-c (y sus inversos)
-    const directTransitions = [
-      ['a', 'b'],
-      ['a', 'c'],
-      ['b', 'c'],
-    ];
-
     const from = gestureMap[prevGesture];
     const to = gestureMap[nextGesture];
 
-    // Buscar si la transición es directa
-    const isDirect = directTransitions.some(
-      ([start, end]) => start === from && end === to
-    );
+    // Si alguno no está definido, no hay transición
+    if (!from || !to) return null;
 
-    if (isDirect) {
-      // Ejemplo: a-b1.mp4
-      return { src: `transitions/${from}-${to}${avatarNum}.mp4`, reverse: false };
-    }
-
-    // Buscar si la transición es inversa (reversa)
-    const isReverse = directTransitions.some(
-      ([start, end]) => start === to && end === from
-    );
-
-    if (isReverse) {
-      // Ejemplo: a-b1.mp4 pero en reversa
-      return { src: `transitions/${to}-${from}${avatarNum}.mp4`, reverse: true };
-    }
-
-    // Si no hay video para esa transición, retorna null
-    return null;
+    // Ejemplo: a-c1.mp4, c-a1.mp4, etc.
+    return { src: `transitions/${from}-${to}${avatarNum}.mp4`, reverse: false };
   }
 
   // Efecto para actualizar los componentes cuando cambian percent o gesture
@@ -387,8 +363,8 @@ function Home() {
                   objectFit: "cover",
                   objectPosition: "center",
                   borderRadius: "20%",
-                  transition: "all 0.3s ease",
-                  transform: transitionVideo.reverse ? "scaleX(-1)" : "none"
+                  transition: "all 0.3s ease"
+                  // Ya no necesitas transform
                 }}
               />
             ) : (

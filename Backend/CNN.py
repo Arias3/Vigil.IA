@@ -58,12 +58,12 @@ custom_objects = {
 
 # Carga de modelos
 lstm_model = tf.keras.models.load_model(
-    "./models/Modelo_6_capas_2.h5",
+    "./models/Modelo_6_capas.h5",
     custom_objects=custom_objects,
     compile=False
 )
 
-cnn_model = tf.keras.models.load_model("./models/model1805.h5")
+cnn_model = tf.keras.models.load_model("./models/2105.h5")
 
 def synchronized_excel_access(func):
     @wraps(func)
