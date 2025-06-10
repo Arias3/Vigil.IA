@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5000'; // URL base de la API
+const API_BASE_URL = 'https://192.168.1.17:5000'; // URL base de la API
 
 // Función para enviar una imagen al backend
 export const processImage = async (imageBlob) => {

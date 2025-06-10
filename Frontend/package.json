@@ -24,6 +24,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "start:all": "concurrently \"cd ../Backend && python CNN.py\" \"cd server && node server.js\"",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -49,6 +50,7 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
+    "concurrently": "^9.1.2",
     "postcss": "^8.5.3"
   }
 }

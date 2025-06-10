@@ -326,4 +326,4 @@ def process_image():
 # ================= INICIO =================
 if __name__ == "__main__":
     initialize_excel()
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000,debug=True,ssl_context=('../frontend/server/certificates/localhost+2.pem', '../frontend/server/certificates/localhost+2-key.pem'))
